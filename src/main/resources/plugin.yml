@@ -1,0 +1,14 @@
+name: GothamBounties
+version: '1.0'
+main: cc.synkdev.gothamBounties.GothamBounties
+api-version: '1.20'
+authors: [ Synk ]
+description: A custom bounty system for GothamNetwork
+website: https://synkdev.cc
+commands:
+  bounty:
+    usage: "/bounty"
+    aliases:
+      - "b"
+depend:
+  - Vault
