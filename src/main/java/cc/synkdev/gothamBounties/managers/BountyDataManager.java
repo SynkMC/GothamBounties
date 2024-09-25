@@ -3,13 +3,12 @@ package cc.synkdev.gothamBounties.managers;
 import cc.synkdev.gothamBounties.GothamBounties;
 import cc.synkdev.gothamBounties.objects.Bounty;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
-public class DataManager {
+public class BountyDataManager {
     private final static GothamBounties core = GothamBounties.getInstance();
     private final static File file = new File(core.getDataFolder(), "data.yml");
     public static void load() {
@@ -21,15 +20,24 @@ public class DataManager {
             BufferedReader reader = new BufferedReader(new FileReader(file));
             String line;
             List<Bounty> list = new ArrayList<>();
+            Map<OfflinePlayer, Double> top = new HashMap<>();
             while ((line = reader.readLine()) != null) {
                 if (!line.isEmpty()) {
                     String[] split = line.split(";");
                     list.add(new Bounty(Bukkit.getOfflinePlayer(UUID.fromString(split[0])),Bukkit.getOfflinePlayer(UUID.fromString(split[1])), Double.parseDouble(split[2])));
+                    OfflinePlayer op = Bukkit.getOfflinePlayer(UUID.fromString(split[1]));
+                    Double d = Double.parseDouble(split[2]);
+                    if (top.containsKey(op)) {
+                        top.replace(op, top.get(op)+d);
+                    } else {
+                        top.put(op, d);
+                    }
                 }
             }
             reader.close();
             core.bountyMap.clear();
             core.bountyMap.addAll(list);
+            core.bountiesMap.putAll(top);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

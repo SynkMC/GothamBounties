@@ -1,11 +1,13 @@
 package cc.synkdev.gothamBounties;
 
+import cc.synkdev.gothamBounties.objects.Band;
 import cc.synkdev.gothamBounties.objects.Bounty;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Util {
     private final static GothamBounties core = GothamBounties.getInstance();
@@ -45,5 +47,21 @@ public class Util {
         if (prefix) s = core.prefix+s;
 
         Bukkit.getConsoleSender().sendMessage(s);
+    }
+    public static Band getBand(OfflinePlayer p) {
+        for (Band b : core.bandsMap) {
+            if (comparePlayers(Bukkit.getOfflinePlayer(b.getLeader()), p)) return b;
+            for (UUID id : b.getMembers()) {
+                OfflinePlayer op = Bukkit.getOfflinePlayer(id);
+                if (comparePlayers(op, p)) return b;
+            }
+        }
+        return null;
+    }
+    public static Band getBand(String name) {
+        for (Band b : core.bandsMap) {
+            if (b.getName().equalsIgnoreCase(name)) return b;
+        }
+        return null;
     }
 }

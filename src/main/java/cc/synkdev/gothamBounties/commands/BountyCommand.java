@@ -3,6 +3,7 @@ package cc.synkdev.gothamBounties.commands;
 import cc.synkdev.gothamBounties.GothamBounties;
 import cc.synkdev.gothamBounties.Util;
 import cc.synkdev.gothamBounties.guis.ConfirmGui;
+import cc.synkdev.gothamBounties.guis.TopGui;
 import cc.synkdev.gothamBounties.objects.Bounty;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -28,7 +29,10 @@ public class BountyCommand implements CommandExecutor, TabExecutor {
         this.sender = sender;
         switch (args.length) {
             case 0:
-                //menu
+                if (sender instanceof Player) {
+                    Player p = (Player) sender;
+                    TopGui.gui().open(p);
+                } else sender.sendMessage(core.prefix+ ChatColor.RED+"This command is only usable by players!");
                 break;
             case 1:
                 switch (args[0]) {
@@ -39,6 +43,12 @@ public class BountyCommand implements CommandExecutor, TabExecutor {
                         if (checkPerm("bounty.command.check", true)) {
                             sender.sendMessage(core.prefix+ChatColor.RED+"Usage: /bounty check <player>");
                         }
+                        break;
+                    case "top":
+                        if (sender instanceof Player) {
+                            Player p = (Player) sender;
+                            TopGui.gui().open(p);
+                        } else sender.sendMessage(core.prefix+ ChatColor.RED+"This command is only usable by players!");
                         break;
                 }
                 break;
@@ -59,7 +69,8 @@ public class BountyCommand implements CommandExecutor, TabExecutor {
                                     TextComponent rm = new TextComponent(ChatColor.RED+""+ChatColor.BOLD+"[-]");
                                     rm.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bounty remove "+b.getOrigin()+" "+b.getTarget()));
                                     main.addExtra(rm);
-                                    sender.spigot().sendMessage(main);
+                                    if (sender instanceof Player) ((Player) sender).spigot().sendMessage(main);
+                                    else sender.sendMessage(core.prefix+ChatColor.GOLD+op.getName()+" put a $"+b.getValue()+" bounty to "+b.getTarget().getName()+"'s head.");
                                 }
 
                                 if (Util.getPlayersBounties(op).isEmpty()) {
@@ -71,7 +82,8 @@ public class BountyCommand implements CommandExecutor, TabExecutor {
                                         TextComponent rm = new TextComponent(ChatColor.RED+""+ChatColor.BOLD+"[-]");
                                         rm.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bounty remove "+b.getOrigin()+" "+b.getTarget()));
                                         main.addExtra(rm);
-                                        sender.spigot().sendMessage(main);
+                                        if (sender instanceof Player) ((Player) sender).spigot().sendMessage(main);
+                                        else sender.sendMessage(ChatColor.GOLD+"- $"+b.getValue()+" by "+b.getOrigin().getName());
                                     }
                                 }
                             } else sender.sendMessage(core.prefix+ChatColor.RED+"This player has never connected to the server before!");
@@ -137,12 +149,17 @@ public class BountyCommand implements CommandExecutor, TabExecutor {
                                     }
                                     double d;
                                     try {
-                                        d = Double.valueOf(args[2]);
+                                        d = Double.parseDouble(args[2]);
                                     } catch (NumberFormatException e) {
                                         p.sendMessage(core.prefix+ChatColor.RED+"The value you provided is incorrect.");
                                         break;
                                     }
-                                    if (core.eco.getBalance(target) < d) {
+                                    if (d == 0) {
+                                        p.sendMessage(core.prefix+ChatColor.RED+"This value is too small!");
+                                        return true;
+                                    }
+                                    if (d > core.eco.getBalance(p)) {
+                                        Bukkit.getLogger().info(p.getName()+"'s balance:"+core.eco.getBalance(p));
                                         p.sendMessage(core.prefix+ChatColor.RED+"You don't have enough money to send this bounty!");
                                         return true;
                                     }
@@ -163,6 +180,7 @@ public class BountyCommand implements CommandExecutor, TabExecutor {
         switch (args.length) {
             case 1:
                 list.add("add");
+                list.add("top");
                 if (checkPerm("bounty.command.check", false)) list.add("check");
                 if (checkPerm("bounty.command.remove", false)) list.add("remove");
                 break;
