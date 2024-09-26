@@ -22,7 +22,7 @@ public class BandDataManager {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (!line.isEmpty()) {
-                    new Band(line);
+                    list.add(new Band(line));
                 }
             }
             reader.close();

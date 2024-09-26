@@ -4,6 +4,7 @@ import cc.synkdev.gothamBounties.GothamBounties;
 import cc.synkdev.gothamBounties.Util;
 import cc.synkdev.gothamBounties.objects.Band;
 import cc.synkdev.gothamBounties.objects.Bounty;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -14,6 +15,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class EventListener implements Listener {
@@ -35,17 +37,21 @@ public class EventListener implements Listener {
                 oriB.setKills(oriB.getKills()+1);
                 core.updateData(oriB);
             }
-            List<Bounty> list = Util.getPlayersBounties(p);
+            Bukkit.getLogger().info("Origin isn't null, isn't target.");
+            List<Bounty> list = new ArrayList<>(Util.getPlayersBounties(p));
             if (list.isEmpty()) return;
 
+            Bukkit.getLogger().info("Origin has bounties.");
             double total = Util.getPlayersBountyTotal(p);
             for (Bounty b : list) {
+                Bukkit.getLogger().info("Processing "+b.getOrigin().getName()+"'s bounty");
                 if (b.getOrigin().isOnline()) {
                     Player pp = (Player) b.getOrigin();
                     pp.sendMessage(core.prefix+ ChatColor.GOLD+p.getName()+" was killed by "+origin.getName()+", they claimed the $"+b.getValue()+" bounty you put on "+p.getName()+"'s name.");
                 }
                 core.bountyMap.remove(b);
             }
+            Bukkit.getLogger().info("Depositing "+total+" in "+origin.getName()+"'s balance");
             core.eco.depositPlayer(origin, total);
             origin.sendMessage(core.prefix+ChatColor.RED+"Since you killed "+p.getName()+", you earned their $"+Math.round(total)+" bounty!");
             p.sendMessage(core.prefix+ChatColor.RED+"Since "+origin.getName()+" killed you, they earned your $"+Math.round(total)+" bounty!");
@@ -54,6 +60,9 @@ public class EventListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player p = event.getPlayer();
+        if (core.offlinePlayers.containsKey(p.getUniqueId())) {
+            core.offlinePlayers.replace(p.getUniqueId(), p.getName());
+        } else core.offlinePlayers.put(p.getUniqueId(), p.getName());
         Band b = Util.getBand(p);
         if (b == null) {
             return;

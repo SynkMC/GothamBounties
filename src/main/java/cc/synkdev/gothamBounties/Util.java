@@ -7,6 +7,7 @@ import org.bukkit.OfflinePlayer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class Util {
@@ -14,7 +15,9 @@ public class Util {
     public static List<Bounty> getPlayersBounties(OfflinePlayer p) {
         List<Bounty> list = new ArrayList<>();
         for (Bounty b : core.bountyMap) {
+            Bukkit.getLogger().info("Running on "+b.getOrigin().getName()+"'s bounty over "+b.getTarget().getName());
             if (comparePlayers(p, b.getTarget())) {
+                Bukkit.getLogger().info("Added to list");
                 list.add(b);
             }
         }
@@ -41,6 +44,7 @@ public class Util {
         return getPlayersSentBounty(p) == null;
     }
     public static Boolean comparePlayers(OfflinePlayer p1, OfflinePlayer p2) {
+        Bukkit.getLogger().info("Comparing "+p1.getUniqueId().toString()+" and "+p2.getUniqueId().toString());
         return p1.getUniqueId().toString().equalsIgnoreCase(p2.getUniqueId().toString());
     }
     public static void log(String s, Boolean prefix) {
@@ -61,6 +65,15 @@ public class Util {
     public static Band getBand(String name) {
         for (Band b : core.bandsMap) {
             if (b.getName().equalsIgnoreCase(name)) return b;
+        }
+        return null;
+    }
+    public static OfflinePlayer getOfflinePlayer(String name) {
+        if (!core.offlinePlayers.containsValue(name)) return null;
+        else {
+            for (Map.Entry<UUID, String> entry : core.offlinePlayers.entrySet()) {
+                if (entry.getValue().equalsIgnoreCase(name)) return Bukkit.getOfflinePlayer(entry.getKey());
+            }
         }
         return null;
     }

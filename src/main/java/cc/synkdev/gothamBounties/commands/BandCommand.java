@@ -67,8 +67,8 @@ public class BandCommand extends BaseCommand {
             return;
         }
 
-        OfflinePlayer op = Bukkit.getOfflinePlayer(args[0]);
-        if (op.hasPlayedBefore() || op.isOnline()) {
+        OfflinePlayer op = Util.getOfflinePlayer(args[0]);
+        if (op != null) {
             b.getInvites().add(op.getUniqueId());
             if (op.isOnline()) {
                 ((Player) op).sendMessage(prefix+ChatColor.GREEN+"You have been invited to join the band "+b.getName()+"!");
@@ -118,8 +118,14 @@ public class BandCommand extends BaseCommand {
             return;
         }
 
-        OfflinePlayer oP = Bukkit.getOfflinePlayer(args[0]);
-        if (!oP.hasPlayedBefore() && !oP.isOnline() || !b.isMember(oP)) {
+        OfflinePlayer oP = Util.getOfflinePlayer(args[0]);
+
+        if (oP == null) {
+            p.sendMessage(prefix+ChatColor.RED+"This player has never connected to the server before!");
+            return;
+        }
+
+        if (!b.isMember(oP)) {
             p.sendMessage(prefix+ChatColor.RED+"This player is not in your band!");
             return;
         }

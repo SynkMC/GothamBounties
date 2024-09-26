@@ -2,10 +2,8 @@ package cc.synkdev.gothamBounties;
 
 import cc.synkdev.gothamBounties.commands.BandCommand;
 import cc.synkdev.gothamBounties.commands.BountyCommand;
-import cc.synkdev.gothamBounties.managers.BandDataManager;
-import cc.synkdev.gothamBounties.managers.BountyDataManager;
+import cc.synkdev.gothamBounties.managers.*;
 import cc.synkdev.gothamBounties.managers.EventListener;
-import cc.synkdev.gothamBounties.managers.PAPIManager;
 import cc.synkdev.gothamBounties.objects.Band;
 import cc.synkdev.gothamBounties.objects.Bounty;
 import co.aikar.commands.PaperCommandManager;
@@ -25,6 +23,7 @@ public final class GothamBounties extends JavaPlugin {
     @Getter private static GothamBounties instance;
     public List<Bounty> bountyMap = new ArrayList<>();
     public Map<OfflinePlayer, Double> bountiesMap = new HashMap<>();
+    public Map<UUID, String> offlinePlayers = new HashMap<>();
     public String prefix = ChatColor.RESET+""+ChatColor.DARK_GRAY+"["+ChatColor.GOLD+"GothamBounties"+ChatColor.DARK_GRAY+"] » "+ChatColor.RESET;
     private Boolean isCrashing = true;
     public Economy eco;
@@ -48,6 +47,7 @@ public final class GothamBounties extends JavaPlugin {
 
         BandDataManager.load();
         BountyDataManager.load();
+        OfflinePlayersList.read();
 
         getCommand("bounty").setTabCompleter(new BountyCommand());
         getCommand("bounty").setExecutor(new BountyCommand());
@@ -66,6 +66,8 @@ public final class GothamBounties extends JavaPlugin {
         BukkitRunnable save = new BukkitRunnable() {
             @Override
             public void run() {
+                OfflinePlayersList.save();
+                OfflinePlayersList.read();
                 BountyDataManager.save();
                 BountyDataManager.load();
                 BandDataManager.save();

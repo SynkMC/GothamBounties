@@ -59,15 +59,15 @@ public class BountyCommand implements CommandExecutor, TabExecutor {
                         break;
                     case "check":
                         if (checkPerm("bounty.command.check", true)) {
-                            OfflinePlayer op = Bukkit.getOfflinePlayer(args[1]);
-                            if (op != null && op.hasPlayedBefore() || op.isOnline()) {
+                            OfflinePlayer op = Util.getOfflinePlayer(args[1]);
+                            if (op != null) {
                                 if (Util.canSendBounty(op)) {
                                     sender.sendMessage(core.prefix+ChatColor.GOLD+op.getName()+" didn't send a bounty to anyone.");
                                 } else {
                                     Bounty b = Util.getPlayersSentBounty(op);
                                     TextComponent main = new TextComponent(core.prefix+ChatColor.GOLD+op.getName()+" put a $"+b.getValue()+" bounty to "+b.getTarget().getName()+"'s head. ");
                                     TextComponent rm = new TextComponent(ChatColor.RED+""+ChatColor.BOLD+"[-]");
-                                    rm.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bounty remove "+b.getOrigin()+" "+b.getTarget()));
+                                    rm.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bounty remove "+b.getOrigin().getName()+" "+b.getTarget().getName()));
                                     main.addExtra(rm);
                                     if (sender instanceof Player) ((Player) sender).spigot().sendMessage(main);
                                     else sender.sendMessage(core.prefix+ChatColor.GOLD+op.getName()+" put a $"+b.getValue()+" bounty to "+b.getTarget().getName()+"'s head.");
@@ -95,10 +95,10 @@ public class BountyCommand implements CommandExecutor, TabExecutor {
                 switch (args[0]) {
                     case "remove":
                         if (checkPerm("bounty.command.remove", true)) {
-                            OfflinePlayer origin = Bukkit.getOfflinePlayer(args[1]);
-                            OfflinePlayer target = Bukkit.getOfflinePlayer(args[2]);
-                            if (origin.hasPlayedBefore() || origin.isOnline()) {
-                                if (target.hasPlayedBefore() || target.isOnline()) {
+                            OfflinePlayer origin = Util.getOfflinePlayer(args[1]);
+                            OfflinePlayer target = Util.getOfflinePlayer(args[2]);
+                            if (origin != null) {
+                                if (target != null) {
                                     List<Bounty> list = Util.getPlayersBounties(target);
                                     if (list.isEmpty()) {
                                         sender.sendMessage(ChatColor.RED+origin.getName() + "didn't put a bounty to "+target.getName()+"'s name!");
@@ -141,8 +141,8 @@ public class BountyCommand implements CommandExecutor, TabExecutor {
                         if (sender instanceof Player) {
                             Player p = (Player) sender;
                             if (Util.canSendBounty(p)) {
-                                OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
-                                if (target != null && target.hasPlayedBefore() || target.isOnline()) {
+                                OfflinePlayer target = Util.getOfflinePlayer(args[1]);
+                                if (target != null) {
                                     if (Util.comparePlayers(p, target)) {
                                         p.sendMessage(core.prefix+ChatColor.RED+"You can't add a bounty on yourself!");
                                         return true;
