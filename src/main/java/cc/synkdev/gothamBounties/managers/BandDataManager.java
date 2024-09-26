@@ -2,6 +2,7 @@ package cc.synkdev.gothamBounties.managers;
 
 import cc.synkdev.gothamBounties.GothamBounties;
 import cc.synkdev.gothamBounties.objects.Band;
+import org.bukkit.Bukkit;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class BandDataManager {
                 writer.write(b.toString());
                 writer.newLine();
             }
+            writer.close();
             temp.renameTo(file);
         } catch (IOException e) {
             throw new RuntimeException(e);

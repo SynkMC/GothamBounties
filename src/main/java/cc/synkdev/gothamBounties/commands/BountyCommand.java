@@ -61,16 +61,19 @@ public class BountyCommand implements CommandExecutor, TabExecutor {
                         if (checkPerm("bounty.command.check", true)) {
                             OfflinePlayer op = Util.getOfflinePlayer(args[1]);
                             if (op != null) {
-                                if (Util.canSendBounty(op)) {
+                                if (Util.canSendBounty(op, null)) {
                                     sender.sendMessage(core.prefix+ChatColor.GOLD+op.getName()+" didn't send a bounty to anyone.");
                                 } else {
-                                    Bounty b = Util.getPlayersSentBounty(op);
-                                    TextComponent main = new TextComponent(core.prefix+ChatColor.GOLD+op.getName()+" put a $"+b.getValue()+" bounty to "+b.getTarget().getName()+"'s head. ");
-                                    TextComponent rm = new TextComponent(ChatColor.RED+""+ChatColor.BOLD+"[-]");
-                                    rm.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bounty remove "+b.getOrigin().getName()+" "+b.getTarget().getName()));
-                                    main.addExtra(rm);
-                                    if (sender instanceof Player) ((Player) sender).spigot().sendMessage(main);
-                                    else sender.sendMessage(core.prefix+ChatColor.GOLD+op.getName()+" put a $"+b.getValue()+" bounty to "+b.getTarget().getName()+"'s head.");
+                                    List<Bounty> bs = Util.getPlayersSentBounties(op);
+                                    for (Bounty b : bs) {
+                                        TextComponent main = new TextComponent(core.prefix+ChatColor.GOLD+op.getName()+" put a $"+b.getValue()+" bounty to "+b.getTarget().getName()+"'s head. ");
+                                        TextComponent rm = new TextComponent(ChatColor.RED+""+ChatColor.BOLD+"[-]");
+                                        rm.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bounty remove "+b.getOrigin().getName()+" "+b.getTarget().getName()));
+                                        main.addExtra(rm);
+                                        if (sender instanceof Player) ((Player) sender).spigot().sendMessage(main);
+                                        else sender.sendMessage(core.prefix+ChatColor.GOLD+op.getName()+" put a $"+b.getValue()+" bounty to "+b.getTarget().getName()+"'s head.");
+                                        sender.sendMessage("");
+                                    }
                                 }
 
                                 if (Util.getPlayersBounties(op).isEmpty()) {
@@ -140,33 +143,36 @@ public class BountyCommand implements CommandExecutor, TabExecutor {
                     case "add":
                         if (sender instanceof Player) {
                             Player p = (Player) sender;
-                            if (Util.canSendBounty(p)) {
-                                OfflinePlayer target = Util.getOfflinePlayer(args[1]);
-                                if (target != null) {
-                                    if (Util.comparePlayers(p, target)) {
-                                        p.sendMessage(core.prefix+ChatColor.RED+"You can't add a bounty on yourself!");
-                                        return true;
-                                    }
-                                    double d;
-                                    try {
-                                        d = Double.parseDouble(args[2]);
-                                    } catch (NumberFormatException e) {
-                                        p.sendMessage(core.prefix+ChatColor.RED+"The value you provided is incorrect.");
-                                        break;
-                                    }
-                                    if (d == 0) {
-                                        p.sendMessage(core.prefix+ChatColor.RED+"This value is too small!");
-                                        return true;
-                                    }
-                                    if (d > core.eco.getBalance(p)) {
-                                        Bukkit.getLogger().info(p.getName()+"'s balance:"+core.eco.getBalance(p));
-                                        p.sendMessage(core.prefix+ChatColor.RED+"You don't have enough money to send this bounty!");
-                                        return true;
-                                    }
-                                    Bounty b = new Bounty(p, target, d);
-                                    ConfirmGui.gui(b).open(p);
-                                } else p.sendMessage(core.prefix+ChatColor.RED+"This player has never connected to the server before!");
-                            } else p.sendMessage(core.prefix+ChatColor.RED+"You can only put a bounty on one player at a time!");
+                            OfflinePlayer target = Util.getOfflinePlayer(args[1]);
+                            if (target != null) {
+                                if (!Util.canSendBounty(p, target)) {
+                                    p.sendMessage(core.prefix+ChatColor.RED+"You can only put one bounty on the same player!");
+                                    return false;
+                                }
+
+                                if (Util.comparePlayers(p, target)) {
+                                    p.sendMessage(core.prefix + ChatColor.RED + "You can't add a bounty on yourself!");
+                                    return true;
+                                }
+                                double d;
+                                try {
+                                    d = Double.parseDouble(args[2]);
+                                } catch (NumberFormatException e) {
+                                    p.sendMessage(core.prefix + ChatColor.RED + "The value you provided is incorrect.");
+                                    break;
+                                }
+                                if (d == 0) {
+                                    p.sendMessage(core.prefix + ChatColor.RED + "This value is too small!");
+                                    return true;
+                                }
+                                if (d > core.eco.getBalance(p)) {
+                                    Bukkit.getLogger().info(p.getName() + "'s balance:" + core.eco.getBalance(p));
+                                    p.sendMessage(core.prefix + ChatColor.RED + "You don't have enough money to send this bounty!");
+                                    return true;
+                                }
+                                Bounty b = new Bounty(p, target, d);
+                                ConfirmGui.gui(b).open(p);
+                            } else p.sendMessage(core.prefix+ChatColor.RED+"This player has never connected to the server before!");
                         } else sender.sendMessage(core.prefix+ ChatColor.RED+"This command is only usable by players!");
                         break;
                 }

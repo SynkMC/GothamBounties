@@ -32,19 +32,22 @@ public class Util {
         }
         return d;
     }
-    public static Bounty getPlayersSentBounty(OfflinePlayer p) {
+    public static List<Bounty> getPlayersSentBounties(OfflinePlayer p) {
+        List<Bounty> list = new ArrayList<>();
         for (Bounty b : core.bountyMap) {
             if (comparePlayers(p, b.getOrigin())) {
-                return b;
+                list.add(b);
             }
         }
-        return null;
+        return list;
     }
-    public static Boolean canSendBounty(OfflinePlayer p) {
-        return getPlayersSentBounty(p) == null;
+    public static Boolean canSendBounty(OfflinePlayer p, OfflinePlayer target) {
+        for (Bounty b : getPlayersSentBounties(p)) {
+            if (comparePlayers(b.getTarget(), target)) return false;
+        }
+        return true;
     }
     public static Boolean comparePlayers(OfflinePlayer p1, OfflinePlayer p2) {
-        Bukkit.getLogger().info("Comparing "+p1.getUniqueId().toString()+" and "+p2.getUniqueId().toString());
         return p1.getUniqueId().toString().equalsIgnoreCase(p2.getUniqueId().toString());
     }
     public static void log(String s, Boolean prefix) {
@@ -69,11 +72,8 @@ public class Util {
         return null;
     }
     public static OfflinePlayer getOfflinePlayer(String name) {
-        if (!core.offlinePlayers.containsValue(name)) return null;
-        else {
-            for (Map.Entry<UUID, String> entry : core.offlinePlayers.entrySet()) {
-                if (entry.getValue().equalsIgnoreCase(name)) return Bukkit.getOfflinePlayer(entry.getKey());
-            }
+        for (Map.Entry<UUID, String> entry : core.offlinePlayers.entrySet()) {
+            if (entry.getValue().equalsIgnoreCase(name)) return Bukkit.getOfflinePlayer(entry.getKey());
         }
         return null;
     }

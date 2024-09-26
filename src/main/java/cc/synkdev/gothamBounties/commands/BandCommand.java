@@ -69,6 +69,11 @@ public class BandCommand extends BaseCommand {
 
         OfflinePlayer op = Util.getOfflinePlayer(args[0]);
         if (op != null) {
+            if (Util.comparePlayers(op, p)) {
+                p.sendMessage(prefix+ChatColor.RED+"You can't invite yourself!");
+                return;
+            }
+
             b.getInvites().add(op.getUniqueId());
             if (op.isOnline()) {
                 ((Player) op).sendMessage(prefix+ChatColor.GREEN+"You have been invited to join the band "+b.getName()+"!");
